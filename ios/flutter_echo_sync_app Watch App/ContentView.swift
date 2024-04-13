@@ -26,10 +26,10 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var isAPICalling = false
     @StateObject var playerManager = AudioPlayerManager()
-    @State private var showingAlert = false
+    @State private var isRecordingPermissionGranted = false
     @ObservedObject var viewModel: WatchViewModel = WatchViewModel()
     @State var temporaryAudioFileURL: URL!
-    
+
 
 
     var body: some View {
@@ -40,7 +40,7 @@ struct ContentView: View {
                     self.isLoading = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         self.isLoading = false
-                        startRecording()
+                        requestRecordingPermission()
                     }
                 }) {
                     Text("Start")
@@ -62,10 +62,10 @@ struct ContentView: View {
                         .frame(height: 80)
                         .padding()
                 }
-                
+
                 Text(String(format: "%.1f", recordingDuration))
                     .font(.title)
-                
+
                 Button(action: {
                     self.stopRecording()
                 }) {
@@ -82,7 +82,7 @@ struct ContentView: View {
                                 print("No recorded audio found.")
                                 return
                             }
-                            
+
                             playerManager.playAudio(from: recordedAudioURL)
                         }
                     }) {
@@ -93,7 +93,7 @@ struct ContentView: View {
                         }
                     }
                     .disabled(isLoading)
-                    
+
                     Button(action: {
                         self.resetRecording()
                     }) {
@@ -103,32 +103,43 @@ struct ContentView: View {
                 }
             }
         }
-        .alert(isPresented: $showingAlert) {
-            Alert(title: Text("Error"), message: Text("Permission to record audio was denied."), dismissButton: .default(Text("OK")))
+        .alert(isPresented: $isRecordingPermissionGranted) {
+            Alert(
+                title: Text("Permission denied"),
+                message: Text("Permission to record audio was denied. Please open the Settings app to enable audio recording permissions. Some privacy settings are shared between Apple Watch and iPhone. You can manage these settings in the Privacy section of iPhone settings."),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
-    
+
+    func requestRecordingPermission() {
+        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+            if granted {
+                DispatchQueue.main.async {
+                    self.isRecordingPermissionGranted = false
+                    self.startRecording()
+                    self.startTimer() // Call startTimer() here
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.isRecordingPermissionGranted = true
+                }
+            }
+        }
+    }
+
     func startRecording() {
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(.record, mode: .default)
             try session.setActive(true)
-            
-            
-           
-            
-            
+
             let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-            
+
             // Create temporary recording file URL
             self.temporaryAudioFileURL = URL(fileURLWithPath: documentsPath, isDirectory: true)
                   .appendingPathComponent("recording.m4a")
 
-            
-//            let audioFilename = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("recording.wav")
-            
-            
-            
             let settings: [String: Any] = [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
                 AVSampleRateKey: 44100,
@@ -136,18 +147,17 @@ struct ContentView: View {
                 AVEncoderBitRateKey: 128000,
                 AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
             ]
-            
+
             self.audioRecorder = try AVAudioRecorder(url: temporaryAudioFileURL, settings: settings)
             self.audioRecorder.record()
             self.recordingState = .recording
             self.showWaveform = true
-            self.startTimer()
-            
+
         } catch {
             print("Error starting recording: \(error.localizedDescription)")
         }
     }
-    
+
     func stopRecording() {
         audioRecorder.stop()
         let session = AVAudioSession.sharedInstance()
@@ -155,22 +165,9 @@ struct ContentView: View {
             try session.setActive(false)
             self.recordedAudioURL = audioRecorder.url
             print(recordedAudioURL)
-//            let audioData = try Data(contentsOf: temporaryAudioFileURL)
-//                       let base64audio = audioData.base64EncodedString()
-//            viewModel.sendDataMessage(for: .sendCounterToFlutter, data: ["recordAudio": viewModel.recordAudio + recordedAudioURL!.absoluteString ])
-            
-            let metadata = ["contentType": "public.aac"] // Example content type
-            
-//            let fileURL = URL(fileURLWithPath: temporaryAudioFileURL.absoluteString.replacingOccurrences(of: "file://", with: ""))
 
-            
-//            print("absolute path : \(fileURL.absoluteString)");
-            
+            let metadata = ["contentType": "public.aac"] //
             viewModel.session.transferFile(recordedAudioURL!, metadata: metadata)
-
-
-            
-//            viewModel.sendDataMessage(for: .sendCounterToFlutter, data: ["recordAudio" : audioData.base64EncodedString()])
             
             audioRecorder = nil
             self.recordingState = .stopped

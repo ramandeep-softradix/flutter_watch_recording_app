@@ -94,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
       switch (call.method) {
         case "sendCounterToFlutter":
           recordAudio = call.arguments["recordAudio"];
-
+getRecordAudio();
           setState(() {});
           break;
         default:
@@ -139,49 +139,48 @@ class _MyHomePageState extends State<MyHomePage> {
                     SizedBox(height: 20),
                     Padding(
                       padding: EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                playAudio();
-                              },
-                              child: Container(
-                                height: 50,
-                                color: Colors.blue,
-                                padding: EdgeInsets.all(10),
-                                child: const Center(
-                                  child: Text("Play",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 30,
-                          ),
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                getRecordAudio();
-                              },
-                              child: Container(
-                                color: Colors.blue,
-                                height: 50,
-                                padding: EdgeInsets.all(10),
-                                child: Center(
-                                  child: Text("Upload",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold)),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // child: Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: InkWell(
+                      //         onTap: () {
+                      //           playAudio();
+                      //         },
+                      //         child: Container(
+                      //           height: 50,
+                      //           color: Colors.blue,
+                      //           padding: EdgeInsets.all(10),
+                      //           child: const Center(
+                      //             child: Text("Play",
+                      //                 style: TextStyle(
+                      //                     fontSize: 16,
+                      //                     fontWeight: FontWeight.bold)),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     SizedBox(
+                      //       width: 30,
+                      //     ),
+                      //     Expanded(
+                      //       child: InkWell(
+                      //         onTap: () {
+                      //         },
+                      //         child: Container(
+                      //           color: Colors.blue,
+                      //           height: 50,
+                      //           padding: EdgeInsets.all(10),
+                      //           child: Center(
+                      //             child: Text("Upload",
+                      //                     style: TextStyle(
+                      //                         fontSize: 16,
+                      //                         fontWeight: FontWeight.bold)),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                     )
                   ],
                 )
