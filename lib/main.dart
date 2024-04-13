@@ -94,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
       switch (call.method) {
         case "sendCounterToFlutter":
           recordAudio = call.arguments["recordAudio"];
-getRecordAudio();
+        getRecordAudio();
           setState(() {});
           break;
         default:
@@ -191,7 +191,7 @@ getRecordAudio();
                     children: [
                       Text(
                         textAlign: TextAlign.left,
-                        '''Follow below steps to record video using apple watch:''',
+                        '''Follow below steps to record audio using apple watch:''',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
