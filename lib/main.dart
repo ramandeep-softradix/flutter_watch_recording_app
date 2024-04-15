@@ -51,11 +51,26 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isLoading = false;
 
   Future<void> getRecordAudio() async {
+    print(recordAudio);
+    setState(() {
+      isLoading = true;
+    });
 
-    setState(() {});
+    File file = File(recordAudio.replaceAll("file://", ""));
+    print("absolute path: ${file.absolute}");
+    String? downloadURL = await uploadFile(file);
+
+    setState(() {
+      String filePath = recordAudio;
+      bool deleted = deleteFile(file);
+      if (deleted) {
+        print('File deleted successfully.');
+        recordAudio = "";
+      } else {
+        print('Failed to delete the file.');
+      }
+    });
   }
-
-
   sendDataToWatch(bool data) async {
     try {
       await channel.invokeMethod("flutterToWatch",
@@ -187,8 +202,8 @@ class _MyHomePageState extends State<MyHomePage> {
  5. Grant permission for the microphone if asked.
  6. Speak while the recording is playing.
  7. Tap the stop button to finish recording.
- 8. Choose to either play the recorded video or reset to record again.
- 9. In the iPhone app, find the recorded video with an option to upload.
+ 8. Choose to either play the recorded audio or reset to record again.
+ 9. In the iPhone app, find the recorded audio with an option to upload.
  10. Tap upload to send the recording to Firebase storage.
                     ''',
                   style: TextStyle(

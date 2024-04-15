@@ -30,78 +30,79 @@ struct ContentView: View {
     @ObservedObject var viewModel: WatchViewModel = WatchViewModel()
     @State var temporaryAudioFileURL: URL!
 
-
     var body: some View {
         VStack {
-            if recordingState == .idle && !viewModel.isLogged {
-                Text("To start the recording you have to login through mobile app").frame(maxWidth: .infinity).bold()
-
-            } else if recordingState == .idle {
-                Text("Record Audio")
-                Button(action: {
-                    self.isLoading = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        self.isLoading = false
-                        requestRecordingPermission()
-                    }
-                }) {
-                    Text("Start")
-                }
-                .padding()
-                .opacity(isLoading ? 0 : 1)
-                .disabled(isLoading)
-                .overlay(
-                    Group {
-                        if isLoading {
-                            ProgressView()
-                                .padding()
-                        }
-                    }
-                )
-            } else if recordingState == .recording {
-                if showWaveform {
-                    WaveformView()
-                        .frame(height: 80)
-                        .padding()
-                }
-
-                Text(String(format: "%.1f", recordingDuration))
-                    .font(.title)
-
-                Button(action: {
-                    self.stopRecording()
-                }) {
-                    Text("Stop")
-                }
-                .buttonStyle(BorderlessButtonStyle())
-            } else if recordingState == .stopped {
-                HStack {
+            if !viewModel.isLogged {
+                Text("To start the recording you have to login through mobile app").bold()
+                    .frame(maxWidth: .infinity)
+            } else {
+                if recordingState == .idle {
+                    Text("Record Audio")
                     Button(action: {
-                        if playerManager.isPlaying {
-                            playerManager.stopAudio()
-                        } else {
-                            guard let recordedAudioURL = self.recordedAudioURL else {
-                                print("No recorded audio found.")
-                                return
+                        self.isLoading = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            self.isLoading = false
+                            requestRecordingPermission()
+                        }
+                    }) {
+                        Text("Start")
+                    }
+                    .padding()
+                    .opacity(isLoading ? 0 : 1)
+                    .disabled(isLoading)
+                    .overlay(
+                        Group {
+                            if isLoading {
+                                ProgressView()
+                                    .padding()
                             }
-
-                            playerManager.playAudio(from: recordedAudioURL)
                         }
-                    }) {
-                        if playerManager.isPlaying {
-                            Image(systemName: "pause")
-                        } else {
-                            Image(systemName: "play")
-                        }
+                    )
+                } else if recordingState == .recording {
+                    if showWaveform {
+                        WaveformView()
+                            .frame(height: 80)
+                            .padding()
                     }
-                    .disabled(isLoading)
+
+                    Text(String(format: "%.1f", recordingDuration))
+                        .font(.title)
 
                     Button(action: {
-                        self.resetRecording()
+                        self.stopRecording()
                     }) {
-                        Text("Reset")
+                        Text("Stop")
                     }
-                    .disabled(isLoading)
+                    .buttonStyle(BorderlessButtonStyle())
+                } else if recordingState == .stopped {
+                    HStack {
+                        Button(action: {
+                            if playerManager.isPlaying {
+                                playerManager.stopAudio()
+                            } else {
+                                guard let recordedAudioURL = self.recordedAudioURL else {
+                                    print("No recorded audio found.")
+                                    return
+                                }
+
+                                playerManager.playAudio(from: recordedAudioURL)
+                            }
+                        }) {
+                            if playerManager.isPlaying {
+                                Image(systemName: "pause")
+                            } else {
+                                Image(systemName: "play")
+                            }
+                        }
+                        .disabled(isLoading)
+
+                        Button(action: {
+                            self.resetRecording()
+                        }) {
+                            Text("Reset")
+                        }
+                        .disabled(isLoading)
+                    }
                 }
             }
         }
@@ -111,6 +112,11 @@ struct ContentView: View {
                 message: Text("Permission to record audio was denied. Please open the Settings app to enable audio recording permissions. Some privacy settings are shared between Apple Watch and iPhone. You can manage these settings in the Privacy section of iPhone settings."),
                 dismissButton: .default(Text("OK"))
             )
+        }
+        .onChange(of: viewModel.isLogged) { isLogged in
+            if !isLogged {
+                resetRecording()
+            }
         }
     }
 
@@ -140,7 +146,7 @@ struct ContentView: View {
 
             // Create temporary recording file URL
             self.temporaryAudioFileURL = URL(fileURLWithPath: documentsPath, isDirectory: true)
-                  .appendingPathComponent("recording.m4a")
+                .appendingPathComponent("recording.m4a")
 
             let settings: [String: Any] = [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
