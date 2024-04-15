@@ -61,9 +61,11 @@ extension AppDelegate: WCSessionDelegate {
         }
 
         func sessionDidBecomeInactive(_ session: WCSession) {
+            session.activate()
         }
 
         func sessionDidDeactivate(_ session: WCSession) {
+            session.activate()
         }
 
 
@@ -77,6 +79,8 @@ extension AppDelegate: WCSessionDelegate {
             }
         }
     }
+
+
 
     func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: (any Error)?) {
         if let error = error {
@@ -120,22 +124,18 @@ extension AppDelegate: WCSessionDelegate {
 
             // Create temporary recording file URL
             var newFilePath = URL(fileURLWithPath: documentsPath, isDirectory: true)
-                  .appendingPathComponent("recording.m4a")
+                  .appendingPathComponent("\(UUID().uuidString ).m4a")
 
-
-
-
-
-    //            // 2. Generate unique filename (optional):
-    //            let filename = UUID().uuidString + ".mp" // Replace with your desired extension (e.g., .m4a, .txt)
-
-    //            // 3. Create new file path:
-    //            let newFilePath = documentsDirectory.appendingPathComponent(filename)
-
-                // 4. Move the file:
                 do {
                     try FileManager.default.moveItem(at: file.fileURL, to: newFilePath)
                   print("File moved successfully to: \(newFilePath)")
+
+                    if let controller = self.window?.rootViewController as? FlutterViewController {
+                        let channel = FlutterMethodChannel(
+                            name: "com.example.flutter_echo_sync_app",
+                            binaryMessenger: controller.binaryMessenger)
+                        channel.invokeMethod("sendCounterToFlutter", arguments: ["recordAudio" : newFilePath.absoluteString])
+                    }
 
                   // 5. (Optional) Process the file content using fileData
                 } catch {

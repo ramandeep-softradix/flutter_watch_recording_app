@@ -66,11 +66,23 @@ class _MyHomePageState extends State<MyHomePage> {
       if (deleted) {
         print('File deleted successfully.');
         recordAudio = "";
+
       } else {
         print('Failed to delete the file.');
       }
     });
+
+
+    Get.snackbar("Upload Done","Record Audio File uploaded successfully!",backgroundColor: Colors.blue);
+
+    print('File uploaded successfully. Download URL: $downloadURL');
+
+    setState(() {
+      isLoading = false;
+    });
+
   }
+
   sendDataToWatch(bool data) async {
     try {
       await channel.invokeMethod("flutterToWatch",
@@ -135,48 +147,6 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 20),
               Padding(
                 padding: EdgeInsets.all(20),
-                // child: Row(
-                //   children: [
-                //     Expanded(
-                //       child: InkWell(
-                //         onTap: () {
-                //           playAudio();
-                //         },
-                //         child: Container(
-                //           height: 50,
-                //           color: Colors.blue,
-                //           padding: EdgeInsets.all(10),
-                //           child: const Center(
-                //             child: Text("Play",
-                //                 style: TextStyle(
-                //                     fontSize: 16,
-                //                     fontWeight: FontWeight.bold)),
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //     SizedBox(
-                //       width: 30,
-                //     ),
-                //     Expanded(
-                //       child: InkWell(
-                //         onTap: () {
-                //         },
-                //         child: Container(
-                //           color: Colors.blue,
-                //           height: 50,
-                //           padding: EdgeInsets.all(10),
-                //           child: Center(
-                //             child: Text("Upload",
-                //                     style: TextStyle(
-                //                         fontSize: 16,
-                //                         fontWeight: FontWeight.bold)),
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
               )
             ],
           )
