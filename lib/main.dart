@@ -3,10 +3,8 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -45,6 +43,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String recordAudio = "";
+  int isLogin = 1;
 
   final channel = const MethodChannel('com.example.flutter_echo_sync_app');
 
@@ -61,7 +60,6 @@ class _MyHomePageState extends State<MyHomePage> {
     String? downloadURL = await uploadFile(file);
 
     setState(() {
-      String filePath = recordAudio;
       bool deleted = deleteFile(file);
       if (deleted) {
         print('File deleted successfully.');
@@ -71,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print('Failed to delete the file.');
       }
     });
-
+    isLogin = 0;
 
     Get.snackbar("Upload Done","Record Audio File uploaded successfully!",backgroundColor: Colors.blue);
 
@@ -82,6 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
   }
+
 
   sendDataToWatch(bool data) async {
     try {
@@ -102,6 +101,8 @@ class _MyHomePageState extends State<MyHomePage> {
       switch (call.method) {
         case "sendCounterToFlutter":
           recordAudio = call.arguments["recordAudio"];
+          print("recordAudio >>> $recordAudio");
+
           getRecordAudio();
           setState(() {});
           break;
@@ -115,6 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _initFlutterChannel();
+    sendDataToWatch(false);
   }
 
   @override
@@ -147,6 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 20),
               Padding(
                 padding: EdgeInsets.all(20),
+
               )
             ],
           )
@@ -172,8 +175,8 @@ class _MyHomePageState extends State<MyHomePage> {
  5. Grant permission for the microphone if asked.
  6. Speak while the recording is playing.
  7. Tap the stop button to finish recording.
- 8. Choose to either play the recorded audio or reset to record again.
- 9. In the iPhone app, find the recorded audio with an option to upload.
+ 8. Choose to either play the recorded video or reset to record again.
+ 9. In the iPhone app, find the recorded video with an option to upload.
  10. Tap upload to send the recording to Firebase storage.
                     ''',
                   style: TextStyle(
@@ -207,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
             activeFgColor: Colors.white,
             inactiveBgColor: Colors.grey,
             inactiveFgColor: Colors.white,
-            initialLabelIndex: 1,
+            initialLabelIndex: isLogin,
             totalSwitches: 2,
             labels: const ['On', 'Off'],
             radiusStyle: true,
@@ -218,6 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
   }
+
   Future<String?> uploadFile(File file) async {
     try {
       Reference storageReference = FirebaseStorage.instance
