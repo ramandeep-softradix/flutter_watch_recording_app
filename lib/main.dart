@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,50 +51,31 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isLoading = false;
 
   Future<void> getRecordAudio() async {
-    print(recordAudio);
-    setState(() {
-      isLoading = true;
-    });
-
-    File file = File(recordAudio.replaceAll("file://", ""));
-    print("absolute path: ${file.absolute}");
-    String? downloadURL = await uploadFile(file);
-
-    setState(() {
-      String filePath = recordAudio;
-      bool deleted = deleteFile(file);
-      if (deleted) {
-        print('File deleted successfully.');
-        recordAudio = "";
-
-      } else {
-        print('Failed to delete the file.');
-      }
-    });
-
-
-    Get.snackbar("Upload Done","Record Audio File uploaded successfully!",backgroundColor: Colors.blue);
-
-    print('File uploaded successfully. Download URL: $downloadURL');
-
-    setState(() {
-      isLoading = false;
-    });
-
-    // await channel.invokeMethod("flutterToWatch",
-    //     {"method": "sendCounterToNative", "data": recordAudio});
 
     setState(() {});
   }
+
+
+  sendDataToWatch(bool data) async {
+    try {
+      await channel.invokeMethod("flutterToWatch",
+          {"method": "sendLoggedToWatch", "data": data});
+      print("send Logged To Watch Successfully!!!");
+    } on PlatformException catch (e) {
+      print("Failed to send data to watch: '${e.message}'.");
+    }
+  }
+
 
   Future<void> _initFlutterChannel() async {
     channel.setMethodCallHandler((call) async {
       // Receive data from Native
       print("call : ${call.method}, ${call.arguments}");
+
       switch (call.method) {
         case "sendCounterToFlutter":
           recordAudio = call.arguments["recordAudio"];
-        getRecordAudio();
+          getRecordAudio();
           setState(() {});
           break;
         default:
@@ -120,84 +101,84 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           recordAudio.isNotEmpty
               ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Here is the recorded audio path',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 20),
-                    Center(
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        '$recordAudio',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: EdgeInsets.all(20),
-                      // child: Row(
-                      //   children: [
-                      //     Expanded(
-                      //       child: InkWell(
-                      //         onTap: () {
-                      //           playAudio();
-                      //         },
-                      //         child: Container(
-                      //           height: 50,
-                      //           color: Colors.blue,
-                      //           padding: EdgeInsets.all(10),
-                      //           child: const Center(
-                      //             child: Text("Play",
-                      //                 style: TextStyle(
-                      //                     fontSize: 16,
-                      //                     fontWeight: FontWeight.bold)),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //     SizedBox(
-                      //       width: 30,
-                      //     ),
-                      //     Expanded(
-                      //       child: InkWell(
-                      //         onTap: () {
-                      //         },
-                      //         child: Container(
-                      //           color: Colors.blue,
-                      //           height: 50,
-                      //           padding: EdgeInsets.all(10),
-                      //           child: Center(
-                      //             child: Text("Upload",
-                      //                     style: TextStyle(
-                      //                         fontSize: 16,
-                      //                         fontWeight: FontWeight.bold)),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                    )
-                  ],
-                )
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Here is the recorded audio path',
+                style:
+                TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              Center(
+                child: Text(
+                  textAlign: TextAlign.center,
+                  '$recordAudio',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(height: 20),
+              Padding(
+                padding: EdgeInsets.all(20),
+                // child: Row(
+                //   children: [
+                //     Expanded(
+                //       child: InkWell(
+                //         onTap: () {
+                //           playAudio();
+                //         },
+                //         child: Container(
+                //           height: 50,
+                //           color: Colors.blue,
+                //           padding: EdgeInsets.all(10),
+                //           child: const Center(
+                //             child: Text("Play",
+                //                 style: TextStyle(
+                //                     fontSize: 16,
+                //                     fontWeight: FontWeight.bold)),
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //     SizedBox(
+                //       width: 30,
+                //     ),
+                //     Expanded(
+                //       child: InkWell(
+                //         onTap: () {
+                //         },
+                //         child: Container(
+                //           color: Colors.blue,
+                //           height: 50,
+                //           padding: EdgeInsets.all(10),
+                //           child: Center(
+                //             child: Text("Upload",
+                //                     style: TextStyle(
+                //                         fontSize: 16,
+                //                         fontWeight: FontWeight.bold)),
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
+              )
+            ],
+          )
               : Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        textAlign: TextAlign.left,
-                        '''Follow below steps to record audio using apple watch:''',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        textAlign: TextAlign.left,
-                        '''
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  textAlign: TextAlign.left,
+                  '''Follow below steps to record audio using apple watch:''',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  textAlign: TextAlign.left,
+                  '''
                         
  1. Make sure your Apple Watch is connected to your iPhone.
  2. Open TestFlight on your iPhone and install the app.
@@ -210,19 +191,48 @@ class _MyHomePageState extends State<MyHomePage> {
  9. In the iPhone app, find the recorded video with an option to upload.
  10. Tap upload to send the recording to Firebase storage.
                     ''',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.normal),
                 ),
-         isLoading ? CircularProgressIndicator(color: Colors.blue,) :SizedBox()
+                toggleSwitch()
+              ],
+            ),
+          ),
+          isLoading ? CircularProgressIndicator(color: Colors.blue,) :SizedBox()
         ],
 
       ),
     );
   }
-
+  Widget toggleSwitch(){
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          textAlign: TextAlign.left,
+          'Login',
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold),
+        ).paddingOnly(right: 10),
+        ToggleSwitch(
+            minWidth: 90.0,
+            cornerRadius: 20.0,
+            activeBgColors: [[Colors.blue[800]!], [Colors.red[800]!]],
+            activeFgColor: Colors.white,
+            inactiveBgColor: Colors.grey,
+            inactiveFgColor: Colors.white,
+            initialLabelIndex: 1,
+            totalSwitches: 2,
+            labels: const ['On', 'Off'],
+            radiusStyle: true,
+            onToggle: (index) {
+              sendDataToWatch(index == 0 ? true : false);
+            }
+        ),
+      ],
+    );
+  }
   Future<String?> uploadFile(File file) async {
     try {
       Reference storageReference = FirebaseStorage.instance

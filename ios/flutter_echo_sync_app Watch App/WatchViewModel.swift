@@ -1,31 +1,27 @@
-import Foundation
 import WatchConnectivity
 
 class WatchViewModel: NSObject, ObservableObject {
     var session: WCSession
-    
+
     @Published var recordAudio: String = ""
-    
+    @Published var isLogged: Bool = false
+
     enum WatchReceiveMethod: String {
         case sendCounterToNative
+        case sendLoggedToWatch
     }
-    
+
     enum WatchSendMethod: String {
         case sendCounterToFlutter
     }
-    
+
     override init() {
-        if WCSession.isSupported() {
-            session = WCSession.default
-        } else {
-            // Handle the case where Watch Connectivity is not supported on this device
-            fatalError("Watch Connectivity is not supported on this device.")
-        }
+        self.session = WCSession.default
         super.init()
-        session.delegate = self
-        session.activate()
+        self.session.delegate = self
+        self.session.activate()
     }
-    
+
     func sendDataMessage(for method: WatchSendMethod, data: [String: Any] = [:]) {
         sendMessage(for: method.rawValue, data: data)
     }
@@ -33,43 +29,46 @@ class WatchViewModel: NSObject, ObservableObject {
 
 extension WatchViewModel: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-           switch activationState {
-           case .activated:
-               print("WCSession activated successfully")
-           case .inactive:
-               print("Unable to activate the WCSession. Error: \(error?.localizedDescription ?? "--")")
-           case .notActivated:
-               print("Unexpected .notActivated state received after trying to activate the WCSession")
-           @unknown default:
-               print("Unexpected state received after trying to activate the WCSession")
-           }
-       }
-   
+        switch activationState {
+        case .activated:
+            print("WCSession activated successfully")
+        case .inactive:
+            print("Unable to activate the WCSession. Error: \(error?.localizedDescription ?? "--")")
+        case .notActivated:
+            print("Unexpected .notActivated state received after trying to activate the WCSession")
+        @unknown default:
+            print("Unexpected state received after trying to activate the WCSession")
+        }
+    }
+
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        DispatchQueue.main.async {
+        print("didReceiveMessage called")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             guard let method = message["method"] as? String,
                   let enumMethod = WatchReceiveMethod(rawValue: method) else {
                 return
             }
-
             switch enumMethod {
             case .sendCounterToNative:
                 self.recordAudio = message["data"] as? String ?? ""
+            case .sendLoggedToWatch:
+                print("Received send Logged To Native message")
+                self.isLogged = message["data"] as? Bool ?? false
             }
         }
     }
-    
+
     func sendMessage(for method: String, data: [String: Any] = [:]) {
         guard session.isReachable else {
             print("Watch app is not reachable.")
             return
         }
-        
+
         let messageData: [String: Any] = ["method": method, "data": data]
         session.sendMessage(messageData, replyHandler: nil, errorHandler: { error in
             print("Error sending message to Watch: \(error.localizedDescription)")
         })
     }
-    
 
 }

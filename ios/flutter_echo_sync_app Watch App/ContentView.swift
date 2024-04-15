@@ -31,10 +31,12 @@ struct ContentView: View {
     @State var temporaryAudioFileURL: URL!
 
 
-
     var body: some View {
         VStack {
-            if recordingState == .idle {
+            if recordingState == .idle && !viewModel.isLogged {
+                Text("To start the recording you have to login through mobile app").frame(maxWidth: .infinity).bold()
+
+            } else if recordingState == .idle {
                 Text("Record Audio")
                 Button(action: {
                     self.isLoading = true
@@ -168,7 +170,7 @@ struct ContentView: View {
 
             let metadata = ["contentType": "public.aac"] //
             viewModel.session.transferFile(recordedAudioURL!, metadata: metadata)
-            
+
             audioRecorder = nil
             self.recordingState = .stopped
             self.stopTimer()
@@ -177,7 +179,7 @@ struct ContentView: View {
             print("Error stopping recording: \(error.localizedDescription)")
         }
     }
-    
+
     func resetRecording() {
         // Delete recorded audio file
         if let recordedAudioURL = self.recordedAudioURL {
@@ -193,13 +195,13 @@ struct ContentView: View {
         self.recordingDuration = 0
         playerManager.stopAudio()
     }
-    
+
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             self.recordingDuration += 0.1
         }
     }
-    
+
     func stopTimer() {
         timer?.invalidate()
         recordingDuration = 0
@@ -219,9 +221,9 @@ struct ContentView_Previews: PreviewProvider {
 struct WaveformView: View {
     let numberOfPoints = 50
     let amplitude: CGFloat = 25
-    
+
     @State private var animatableData: CGFloat = 0
-    
+
     var body: some View {
         GeometryReader { geometry in
             Path { path in
@@ -239,7 +241,7 @@ struct WaveformView: View {
             startAnimation()
         }
     }
-    
+
     func startAnimation() {
         withAnimation(Animation.linear(duration: 2).repeatForever(autoreverses: false)) {
             animatableData = CGFloat.pi * 2
@@ -250,7 +252,7 @@ struct WaveformView: View {
 class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     var audioPlayer: AVAudioPlayer?
     @Published var isPlaying = false
-    
+
     func playAudio(from url: URL) {
         do {
             self.audioPlayer = try AVAudioPlayer(contentsOf: url)
@@ -259,24 +261,24 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 print("Audio player is nil.")
                 return
             }
-            
+
             try AVAudioSession.sharedInstance().setCategory(.playback)
             try AVAudioSession.sharedInstance().setActive(true)
-            
+
             player.play()
-            
+
             self.isPlaying = true
         } catch {
             print("Error playing audio: \(error.localizedDescription)")
             self.isPlaying = false
         }
     }
-    
+
     func stopAudio() {
         audioPlayer?.stop()
         isPlaying = false
     }
-    
+
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         if flag {
             isPlaying = false
