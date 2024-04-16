@@ -4,7 +4,7 @@ class WatchViewModel: NSObject, ObservableObject {
     var session: WCSession
     
     @Published var recordAudio: String = ""
-    @Published var isLogged: Bool = false
+    @Published  var isUserLoggedIn = false
 
     enum WatchReceiveMethod: String {
         case sendCounterToNative
@@ -34,34 +34,35 @@ extension WatchViewModel: WCSessionDelegate {
         switch activationState {
         case .activated:
             print("WCSession activated successfully")
+            let isUserLogged = getBoolFromUserDefaults(forKey: "isUserLoggedIn")
+            print("Is user logged in? \(isUserLoggedIn)")
+            isUserLoggedIn = isUserLogged
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isLogged])
+                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isUserLoggedIn])
 
             }
 
         case .inactive:
             print("Unable to activate the WCSession. Error: \(error?.localizedDescription ?? "--")")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isLogged])
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isUserLoggedIn])
 
             }
-
         case .notActivated:
             print("Unexpected .notActivated state received after trying to activate the WCSession")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isLogged])
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isUserLoggedIn])
 
             }
-
-
         @unknown default:
             print("Unexpected state received after trying to activate the WCSession")
-            
         }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         print("didReceiveMessage called")
+
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             guard let method = message["method"] as? String,
@@ -73,21 +74,37 @@ extension WatchViewModel: WCSessionDelegate {
                 self.recordAudio = message["data"] as? String ?? ""
             case .sendLoggedToWatch:
                 print("Received send Logged To Native message")
-                self.isLogged = message["data"] as? Bool ?? false
+                 saveBoolToUserDefaults(value: message["data"] as? Bool ?? false, forKey: "isUserLoggedIn")
+
+                let isUserLogged = getBoolFromUserDefaults(forKey: "isUserLoggedIn")
+                print("Is user logged in? \(isUserLoggedIn)")
+                isUserLoggedIn = isUserLogged
+
             }
         }
     }
-    
+
     func sendMessage(for method: String, data: [String: Any] = [:]) {
         guard session.isReachable else {
             print("Watch app is not reachable.")
             return
         }
-        
+
         let messageData: [String: Any] = ["method": method, "data": data]
         session.sendMessage(messageData, replyHandler: nil, errorHandler: { error in
             print("Error sending message to Watch: \(error.localizedDescription)")
         })
     }
- 
+
+    func saveBoolToUserDefaults(value: Bool, forKey key: String) {
+        let defaults = UserDefaults.standard
+        defaults.set(value, forKey: key)
+    }
+
+    // Function to retrieve boolean value from UserDefaults
+    func getBoolFromUserDefaults(forKey key: String) -> Bool {
+        let defaults = UserDefaults.standard
+        return defaults.bool(forKey: key)
+    }
+
 }

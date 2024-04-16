@@ -1,298 +1,296 @@
-//
-//  ContentView.swift
-//  flutter_echo_sync_app Watch App
-//
-//  Created by Jaskaran Softradix on 10/04/24.
-//
+import 'dart:developer';
+import 'dart:ffi';
+import 'dart:io';
 
-import SwiftUI
-import AVFoundation
+import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
-enum RecordingState {
-    case idle
-    case recording
-    case stopped
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await SharedPreferences.getInstance();
+  runApp(MyApp());
 }
 
-@available(watchOS 8.0, *)
-struct ContentView: View {
-    @State private var recordingState: RecordingState = .idle
-    @State private var audioRecorder: AVAudioRecorder!
-    @State private var audioPlayer: AVAudioPlayer?
-    @State private var recordedAudioURL: URL?
-    @State private var recordingDuration: TimeInterval = 0
-    @State private var timer: Timer?
-    @State private var showWaveform = false
-    @State private var isLoading = false
-    @State private var isAPICalling = false
-    @StateObject var playerManager = AudioPlayerManager()
-    @State private var isRecordingPermissionGranted = false
-    @ObservedObject var viewModel: WatchViewModel = WatchViewModel()
-    @State var temporaryAudioFileURL: URL!
+class MyApp extends StatelessWidget {
+  final audioPlayer = AudioPlayer();
 
- 
-    var body: some View {
-        VStack {
-            if !viewModel.isLogged {
-                
-                Text("To start the recording you have to login through mobile app").bold()
-                    .frame(maxWidth: .infinity)
-            } else {
-                if recordingState == .idle {
-                    Text("Record Audio")
-                    Button(action: {
-                        self.isLoading = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            self.isLoading = false
-                            requestRecordingPermission()
-                        }
-                    }) {
-                        Text("Start")
-                    }
-                    .padding()
-                    .opacity(isLoading ? 0 : 1)
-                    .disabled(isLoading)
-                    .overlay(
-                        Group {
-                            if isLoading {
-                                ProgressView()
-                                    .padding()
-                            }
-                        }
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      title: 'Record Audio',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: MyHomePage(
+        title: 'Record Audio',
+        key: UniqueKey(),
+      ),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  MyHomePage({required Key key, required this.title}) : super(key: key);
+  final String title;
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  String recordAudio = "";
+
+  final channel = const MethodChannel('com.example.flutter_echo_sync_app');
+
+  bool isLoading = false;
+  bool isLoggedIn = false;
+
+
+  Future<void> getRecordAudio() async {
+    print(recordAudio);
+    setState(() {
+      isLoading = true;
+    });
+
+    File file = File(recordAudio.replaceAll("file://", ""));
+    print("absolute path: ${file.absolute}");
+    String? downloadURL = await uploadFile(file);
+
+    setState(() {
+      bool deleted = deleteFile(file);
+      if (deleted) {
+        print('File deleted successfully.');
+        recordAudio = "";
+      } else {
+        print('Failed to delete the file.');
+      }
+    });
+
+    Get.snackbar("Upload Done", "Record Audio File uploaded successfully!",
+        backgroundColor: Colors.blue);
+
+    print('File uploaded successfully. Download URL: $downloadURL');
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  sendDataToWatch(bool data) async {
+    try {
+      await channel.invokeMethod(
+          "flutterToWatch", {"method": "sendLoggedToWatch", "data": data});
+      print("send Logged To Watch Successfully!!!");
+    } on PlatformException catch (e) {
+      print("Failed to send data to watch: '${e.message}'.");
+    }
+  }
+
+  Future<void> _initFlutterChannel() async {
+    channel.setMethodCallHandler((call) async {
+      print("call : ${call.method}, ${call.arguments}");
+
+      switch (call.method) {
+        case "sendLoggedToWatch":
+        await sendDataToWatch(isLoggedIn);
+        getUserLogged();
+        print("isLoggedIn >>$isLoggedIn");
+
+        setState(() {
+
+        });
+        case "sendCounterToFlutter":
+          recordAudio = call.arguments["recordAudio"];
+          print("recordAudio >>> $recordAudio");
+          getRecordAudio();
+          setState(() {});
+          break;
+        default:
+          break;
+      }
+    });
+  }
+getUserLogged()async{
+  bool isLogged = await getBoolFromSharedPreferences('isUserLoggedIn');
+  print('Is user logged in? $isLogged');
+  sendDataToWatch(isLogged);
+  isLoggedIn = isLogged;
+  print('Is user isLoggedIn $isLogged');
+  setState(() {
+
+  });
+
+}
+  @override
+  initState()  {
+    super.initState();
+     getUserLogged();
+
+    _initFlutterChannel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          recordAudio.isNotEmpty
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Here is the recorded audio path',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        '$recordAudio',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: EdgeInsets.all(20),
                     )
-                } else if recordingState == .recording {
-                    if showWaveform {
-                        WaveformView()
-                            .frame(height: 80)
-                            .padding()
-                    }
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        textAlign: TextAlign.left,
+                        '''Follow below steps to record audio using apple watch:''',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        textAlign: TextAlign.left,
+                        '''
 
-                    Text(String(format: "%.1f", recordingDuration))
-                        .font(.title)
+ 1. Make sure your Apple Watch is connected to your iPhone.
+ 2. Open TestFlight on your iPhone and install the app.
+ 3. When prompted, allow the Flutter app to access your Apple Watch.
+ 4. Tap the play button to start recording.
+ 5. Grant permission for the microphone if asked.
+ 6. Speak while the recording is playing.
+ 7. Tap the stop button to finish recording.
+ 8. Choose to either play the recorded video or reset to record again.
+ 9. In the iPhone app, find the recorded video with an option to upload.
+ 10. Tap upload to send the recording to Firebase storage.
+                    ''',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.normal),
+                      ),
+                      toggleSwitch()
+                    ],
+                  ),
+                ),
+          isLoading
+              ? CircularProgressIndicator(
+                  color: Colors.blue,
+                )
+              : SizedBox()
+        ],
+      ),
+    );
+  }
 
-                    Button(action: {
-                        self.stopRecording()
-                    }) {
-                        Text("Stop")
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                } else if recordingState == .stopped {
-                    HStack {
-                        Button(action: {
-                            if playerManager.isPlaying {
-                                playerManager.stopAudio()
-                            } else {
-                                guard let recordedAudioURL = self.recordedAudioURL else {
-                                    print("No recorded audio found.")
-                                    return
-                                }
+  Widget toggleSwitch() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          textAlign: TextAlign.left,
+          'Login',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ).paddingOnly(right: 10),
+        ToggleSwitch(
+            minWidth: 90.0,
+            cornerRadius: 20.0,
+            activeBgColors: [
+              [Colors.blue[800]!],
+              [Colors.red[800]!]
+            ],
+            activeFgColor: Colors.white,
+            inactiveBgColor: Colors.grey,
+            inactiveFgColor: Colors.white,
+            initialLabelIndex: isLoggedIn ? 0 :1,
+            totalSwitches: 2,
+            labels: const ['On', 'Off'],
+            radiusStyle: true,
+            onToggle: (index) {
+              print(index);
+              saveBoolToSharedPreferences(index == 0 ? true : false, 'isUserLoggedIn');
+              sendDataToWatch(index == 0 ? true : false);
 
-                                playerManager.playAudio(from: recordedAudioURL)
-                            }
-                        }) {
-                            if playerManager.isPlaying {
-                                Image(systemName: "pause")
-                            } else {
-                                Image(systemName: "play")
-                            }
-                        }
-                        .disabled(isLoading)
+            }),
+      ],
+    );
+  }
 
-                        Button(action: {
-                            self.resetRecording()
-                        }) {
-                            Text("Reset")
-                        }
-                        .disabled(isLoading)
-                    }
-                }
-            }
-        }
-        .alert(isPresented: $isRecordingPermissionGranted) {
-            Alert(
-                title: Text("Permission denied"),
-                message: Text("Permission to record audio was denied. Please open the Settings app to enable audio recording permissions. Some privacy settings are shared between Apple Watch and iPhone. You can manage these settings in the Privacy section of iPhone settings."),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-        .onChange(of: viewModel.isLogged) { isLogged in
+  Future<String?> uploadFile(File file) async {
+    try {
+      Reference storageReference = FirebaseStorage.instance
+          .ref()
+          .child('uploads/${DateTime.now().millisecondsSinceEpoch}');
 
-            if !isLogged {
-                resetRecording()
-            }
-        }
+      UploadTask uploadTask = storageReference.putFile(file);
+
+      TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+      String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+      return downloadURL;
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null;
     }
+  }
 
-    func requestRecordingPermission() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            if granted {
-                DispatchQueue.main.async {
-                    self.isRecordingPermissionGranted = false
-                    self.startRecording()
-                    self.startTimer() // Call startTimer() here
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.isRecordingPermissionGranted = true
-                }
-            }
-        }
+  playAudio() {
+    final player = AudioPlayer();
+    player.play(DeviceFileSource(recordAudio));
+  }
+
+  bool deleteFile(File filePath) {
+    try {
+      filePath.deleteSync();
+      return true;
+    } catch (e) {
+      print('Error deleting file: $e');
+      return false;
     }
+  }
 
-    func startRecording() {
-        let session = AVAudioSession.sharedInstance()
-        do {
-            try session.setCategory(.record, mode: .default)
-            try session.setActive(true)
+  Future<void> saveBoolToSharedPreferences(bool value, String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
 
-            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-
-            // Create temporary recording file URL
-            self.temporaryAudioFileURL = URL(fileURLWithPath: documentsPath, isDirectory: true)
-                .appendingPathComponent("recording.m4a")
-
-            let settings: [String: Any] = [
-                AVFormatIDKey: kAudioFormatMPEG4AAC,
-                AVSampleRateKey: 44100,
-                AVNumberOfChannelsKey: 2,
-                AVEncoderBitRateKey: 128000,
-                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-            ]
-
-            self.audioRecorder = try AVAudioRecorder(url: temporaryAudioFileURL, settings: settings)
-            self.audioRecorder.record()
-            self.recordingState = .recording
-            self.showWaveform = true
-
-        } catch {
-            print("Error starting recording: \(error.localizedDescription)")
-        }
-    }
-
-    func stopRecording() {
-        audioRecorder.stop()
-        let session = AVAudioSession.sharedInstance()
-        do {
-            try session.setActive(false)
-            self.recordedAudioURL = audioRecorder.url
-            print(recordedAudioURL)
-
-            let metadata = ["contentType": "public.aac"] //
-            viewModel.session.transferFile(recordedAudioURL!, metadata: metadata)
-
-            audioRecorder = nil
-            self.recordingState = .stopped
-            self.stopTimer()
-            self.showWaveform = false
-        } catch {
-            print("Error stopping recording: \(error.localizedDescription)")
-        }
-    }
-
-    func resetRecording() {
-        // Delete recorded audio file
-        if let recordedAudioURL = self.recordedAudioURL {
-            do {
-                try FileManager.default.removeItem(at: recordedAudioURL)
-            } catch {
-                print("Error deleting recorded audio file: \(error.localizedDescription)")
-            }
-        }
-        // Reset variables
-        self.recordingState = .idle
-        self.recordedAudioURL = nil
-        self.recordingDuration = 0
-        playerManager.stopAudio()
-    }
-
-    func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            self.recordingDuration += 0.1
-        }
-    }
-
-    func stopTimer() {
-        timer?.invalidate()
-        recordingDuration = 0
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        if #available(watchOS 8.0, *) {
-            ContentView()
-        } else {
-            // Fallback on earlier versions
-        }
-    }
-}
-
-struct WaveformView: View {
-    let numberOfPoints = 50
-    let amplitude: CGFloat = 25
-
-    @State private var animatableData: CGFloat = 0
-
-    var body: some View {
-        GeometryReader { geometry in
-            Path { path in
-                path.move(to: CGPoint(x: 0, y: geometry.size.height / 2))
-                for i in 0..<numberOfPoints {
-                    let x = CGFloat(i) / CGFloat(numberOfPoints) * geometry.size.width
-                    let y = CGFloat(sin(Double(i) / 10 + Double(animatableData)) * Double(amplitude)) + geometry.size.height / 2
-                    path.addLine(to: CGPoint(x: x, y: y))
-                }
-            }
-            .stroke(Color.blue, lineWidth: 2)
-        }
-        .drawingGroup()
-        .onAppear {
-            startAnimation()
-        }
-    }
-
-    func startAnimation() {
-        withAnimation(Animation.linear(duration: 2).repeatForever(autoreverses: false)) {
-            animatableData = CGFloat.pi * 2
-        }
-    }
-}
-
-class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
-    var audioPlayer: AVAudioPlayer?
-    @Published var isPlaying = false
-
-    func playAudio(from url: URL) {
-        do {
-            self.audioPlayer = try AVAudioPlayer(contentsOf: url)
-            self.audioPlayer?.delegate = self
-            guard let player = self.audioPlayer else {
-                print("Audio player is nil.")
-                return
-            }
-
-            try AVAudioSession.sharedInstance().setCategory(.playback)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            player.play()
-
-            self.isPlaying = true
-        } catch {
-            print("Error playing audio: \(error.localizedDescription)")
-            self.isPlaying = false
-        }
-    }
-
-    func stopAudio() {
-        audioPlayer?.stop()
-        isPlaying = false
-    }
-
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        if flag {
-            isPlaying = false
-        } else {
-            print("Audio playback finished unsuccessfully.")
-        }
-    }
+  Future<bool> getBoolFromSharedPreferences(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(key) ?? false;
+  }
 }

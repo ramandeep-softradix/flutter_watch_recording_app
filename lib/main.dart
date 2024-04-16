@@ -11,11 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await SharedPreferences.getInstance();
   runApp(MyApp());
 }
 
@@ -48,12 +51,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String recordAudio = "";
-  int isLogin = 1;
 
   final channel = const MethodChannel('com.example.flutter_echo_sync_app');
 
   bool isLoading = false;
-  bool isLogout = false;
+  bool isLoggedIn = false;
+
 
   Future<void> getRecordAudio() async {
     print(recordAudio);
@@ -74,7 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
         print('Failed to delete the file.');
       }
     });
-    isLogin = 0;
 
     Get.snackbar("Upload Done", "Record Audio File uploaded successfully!",
         backgroundColor: Colors.blue);
@@ -98,16 +100,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _initFlutterChannel() async {
     channel.setMethodCallHandler((call) async {
-      // Receive data from Native
       print("call : ${call.method}, ${call.arguments}");
 
       switch (call.method) {
         case "sendLoggedToWatch":
-          isLogout = call.arguments["data"]["isLogout"];
-          if (!isLogout) {
-            isLogin = 1;
-          }
-          setState(() {});
+          await sendDataToWatch(isLoggedIn);
+          getUserLogged();
+          print("isLoggedIn >>$isLoggedIn");
+
+          setState(() {
+
+          });
         case "sendCounterToFlutter":
           recordAudio = call.arguments["recordAudio"];
           print("recordAudio >>> $recordAudio");
@@ -119,12 +122,20 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
   }
+  getUserLogged()async{
+    bool isLogged = await getBoolFromSharedPreferences('isUserLoggedIn');
+    print('Is user logged in? $isLogged');
+    sendDataToWatch(isLogged);
+    isLoggedIn = isLogged;
+    print('Is user isLoggedIn $isLogged');
 
+  }
   @override
-  void initState() {
+  initState()  {
     super.initState();
+    getUserLogged();
+
     _initFlutterChannel();
-    sendDataToWatch(false);
   }
 
   @override
@@ -182,8 +193,8 @@ class _MyHomePageState extends State<MyHomePage> {
  5. Grant permission for the microphone if asked.
  6. Speak while the recording is playing.
  7. Tap the stop button to finish recording.
- 8. Choose to either play the recorded audio or reset to record again.
- 9. In the iPhone app, find the recorded audio with an option to upload.
+ 8. Choose to either play the recorded video or reset to record again.
+ 9. In the iPhone app, find the recorded video with an option to upload.
  10. Tap upload to send the recording to Firebase storage.
                     ''',
                   style: TextStyle(
@@ -223,11 +234,13 @@ class _MyHomePageState extends State<MyHomePage> {
             activeFgColor: Colors.white,
             inactiveBgColor: Colors.grey,
             inactiveFgColor: Colors.white,
-            initialLabelIndex: isLogin,
+            initialLabelIndex: isLoggedIn ? 0:1,
             totalSwitches: 2,
             labels: const ['On', 'Off'],
             radiusStyle: true,
             onToggle: (index) {
+              print(index);
+              saveBoolToSharedPreferences(index == 0 ? true : false, 'isUserLoggedIn');
               sendDataToWatch(index == 0 ? true : false);
             }),
       ],
@@ -265,5 +278,15 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Error deleting file: $e');
       return false;
     }
+  }
+
+  Future<void> saveBoolToSharedPreferences(bool value, String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+  Future<bool> getBoolFromSharedPreferences(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(key) ?? false;
   }
 }
