@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -94,25 +96,21 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
   Future<void> _initFlutterChannel() async {
     channel.setMethodCallHandler((call) async {
       // Receive data from Native
       print("call : ${call.method}, ${call.arguments}");
 
       switch (call.method) {
-        case "sendCounterToFlutter":
+        case "sendLoggedToWatch":
           isLogout = call.arguments["data"]["isLogout"];
           if (!isLogout) {
             isLogin = 1;
           }
           setState(() {});
-
+        case "sendCounterToFlutter":
           recordAudio = call.arguments["recordAudio"];
           print("recordAudio >>> $recordAudio");
-
-          //     isLogin =
-
           getRecordAudio();
           setState(() {});
           break;
@@ -184,8 +182,8 @@ class _MyHomePageState extends State<MyHomePage> {
  5. Grant permission for the microphone if asked.
  6. Speak while the recording is playing.
  7. Tap the stop button to finish recording.
- 8. Choose to either play the recorded video or reset to record again.
- 9. In the iPhone app, find the recorded video with an option to upload.
+ 8. Choose to either play the recorded audio or reset to record again.
+ 9. In the iPhone app, find the recorded audio with an option to upload.
  10. Tap upload to send the recording to Firebase storage.
                     ''',
                   style: TextStyle(

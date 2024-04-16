@@ -13,6 +13,7 @@ class WatchViewModel: NSObject, ObservableObject {
 
     enum WatchSendMethod: String {
         case sendCounterToFlutter
+        case sendLoggedToWatch
 
     }
 
@@ -34,16 +35,28 @@ extension WatchViewModel: WCSessionDelegate {
         case .activated:
             print("WCSession activated successfully")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.sendDataMessage(for: .sendCounterToFlutter, data: ["isLogout": self.isLogged])
+                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isLogged])
 
             }
 
         case .inactive:
             print("Unable to activate the WCSession. Error: \(error?.localizedDescription ?? "--")")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isLogged])
+
+            }
+
         case .notActivated:
             print("Unexpected .notActivated state received after trying to activate the WCSession")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isLogged])
+
+            }
+
+
         @unknown default:
             print("Unexpected state received after trying to activate the WCSession")
+            
         }
     }
 
