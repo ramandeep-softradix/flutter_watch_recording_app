@@ -45,16 +45,10 @@ extension WatchViewModel: WCSessionDelegate {
 
         case .inactive:
             print("Unable to activate the WCSession. Error: \(error?.localizedDescription ?? "--")")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isUserLoggedIn])
 
-            }
         case .notActivated:
             print("Unexpected .notActivated state received after trying to activate the WCSession")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isUserLoggedIn])
 
-            }
         @unknown default:
             print("Unexpected state received after trying to activate the WCSession")
         }
