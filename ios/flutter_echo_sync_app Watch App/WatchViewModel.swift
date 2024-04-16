@@ -2,7 +2,7 @@ import WatchConnectivity
 
 class WatchViewModel: NSObject, ObservableObject {
     var session: WCSession
-
+    
     @Published var recordAudio: String = ""
     @Published var isLogged: Bool = false
 
@@ -13,6 +13,7 @@ class WatchViewModel: NSObject, ObservableObject {
 
     enum WatchSendMethod: String {
         case sendCounterToFlutter
+
     }
 
     override init() {
@@ -32,6 +33,11 @@ extension WatchViewModel: WCSessionDelegate {
         switch activationState {
         case .activated:
             print("WCSession activated successfully")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.sendDataMessage(for: .sendCounterToFlutter, data: ["isLogout": self.isLogged])
+
+            }
+
         case .inactive:
             print("Unable to activate the WCSession. Error: \(error?.localizedDescription ?? "--")")
         case .notActivated:
@@ -58,17 +64,17 @@ extension WatchViewModel: WCSessionDelegate {
             }
         }
     }
-
+    
     func sendMessage(for method: String, data: [String: Any] = [:]) {
         guard session.isReachable else {
             print("Watch app is not reachable.")
             return
         }
-
+        
         let messageData: [String: Any] = ["method": method, "data": data]
         session.sendMessage(messageData, replyHandler: nil, errorHandler: { error in
             print("Error sending message to Watch: \(error.localizedDescription)")
         })
     }
-
+ 
 }

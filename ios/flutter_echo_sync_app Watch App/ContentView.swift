@@ -30,9 +30,11 @@ struct ContentView: View {
     @ObservedObject var viewModel: WatchViewModel = WatchViewModel()
     @State var temporaryAudioFileURL: URL!
 
+ 
     var body: some View {
         VStack {
             if !viewModel.isLogged {
+                
                 Text("To start the recording you have to login through mobile app").bold()
                     .frame(maxWidth: .infinity)
             } else {
@@ -114,6 +116,7 @@ struct ContentView: View {
             )
         }
         .onChange(of: viewModel.isLogged) { isLogged in
+
             if !isLogged {
                 resetRecording()
             }

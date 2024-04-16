@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -48,6 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final channel = const MethodChannel('com.example.flutter_echo_sync_app');
 
   bool isLoading = false;
+  bool isLogout = false;
 
   Future<void> getRecordAudio() async {
     print(recordAudio);
@@ -64,28 +68,26 @@ class _MyHomePageState extends State<MyHomePage> {
       if (deleted) {
         print('File deleted successfully.');
         recordAudio = "";
-
       } else {
         print('Failed to delete the file.');
       }
     });
     isLogin = 0;
 
-    Get.snackbar("Upload Done","Record Audio File uploaded successfully!",backgroundColor: Colors.blue);
+    Get.snackbar("Upload Done", "Record Audio File uploaded successfully!",
+        backgroundColor: Colors.blue);
 
     print('File uploaded successfully. Download URL: $downloadURL');
 
     setState(() {
       isLoading = false;
     });
-
   }
-
 
   sendDataToWatch(bool data) async {
     try {
-      await channel.invokeMethod("flutterToWatch",
-          {"method": "sendLoggedToWatch", "data": data});
+      await channel.invokeMethod(
+          "flutterToWatch", {"method": "sendLoggedToWatch", "data": data});
       print("send Logged To Watch Successfully!!!");
     } on PlatformException catch (e) {
       print("Failed to send data to watch: '${e.message}'.");
@@ -100,8 +102,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
       switch (call.method) {
         case "sendCounterToFlutter":
+          isLogout = call.arguments["data"]["isLogout"];
+          if (!isLogout) {
+            isLogin = 1;
+          }
+          setState(() {});
+
           recordAudio = call.arguments["recordAudio"];
           print("recordAudio >>> $recordAudio");
+
+          //     isLogin =
 
           getRecordAudio();
           setState(() {});
@@ -149,7 +159,6 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 20),
               Padding(
                 padding: EdgeInsets.all(20),
-
               )
             ],
           )
@@ -186,13 +195,17 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          isLoading ? CircularProgressIndicator(color: Colors.blue,) :SizedBox()
+          isLoading
+              ? CircularProgressIndicator(
+            color: Colors.blue,
+          )
+              : SizedBox()
         ],
-
       ),
     );
   }
-  Widget toggleSwitch(){
+
+  Widget toggleSwitch() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -200,13 +213,15 @@ class _MyHomePageState extends State<MyHomePage> {
         Text(
           textAlign: TextAlign.left,
           'Login',
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ).paddingOnly(right: 10),
         ToggleSwitch(
             minWidth: 90.0,
             cornerRadius: 20.0,
-            activeBgColors: [[Colors.blue[800]!], [Colors.red[800]!]],
+            activeBgColors: [
+              [Colors.blue[800]!],
+              [Colors.red[800]!]
+            ],
             activeFgColor: Colors.white,
             inactiveBgColor: Colors.grey,
             inactiveFgColor: Colors.white,
@@ -216,8 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
             radiusStyle: true,
             onToggle: (index) {
               sendDataToWatch(index == 0 ? true : false);
-            }
-        ),
+            }),
       ],
     );
   }
