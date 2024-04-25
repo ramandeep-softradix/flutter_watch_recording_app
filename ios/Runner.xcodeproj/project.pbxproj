@@ -15,15 +15,20 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		C6264F5E2BDA7F6C008E9199 /* CubicCurveControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6264F572BDA7F6C008E9199 /* CubicCurveControls.swift */; };
+		C6264F5F2BDA7F6C008E9199 /* SiriWave2.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6264F582BDA7F6C008E9199 /* SiriWave2.swift */; };
+		C6264F602BDA7F6C008E9199 /* SiriWave2Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6264F592BDA7F6C008E9199 /* SiriWave2Path.swift */; };
+		C6264F612BDA7F6C008E9199 /* SiriWave2Shape.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6264F5A2BDA7F6C008E9199 /* SiriWave2Shape.swift */; };
+		C6264F622BDA7F6C008E9199 /* Wave2Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6264F5B2BDA7F6C008E9199 /* Wave2Data.swift */; };
+		C6264F632BDA7F6C008E9199 /* Wave2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6264F5C2BDA7F6C008E9199 /* Wave2View.swift */; };
+		C6264F652BDA800E008E9199 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C6264F642BDA800E008E9199 /* GoogleService-Info.plist */; };
 		DBB81E780169D3F45129DDE9 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BD6F79060762CDFB07F0A3A /* Pods_RunnerTests.framework */; };
-		E36F03AA2BCEB1F900659AA7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E36F03A92BCEB1F900659AA7 /* GoogleService-Info.plist */; };
 		E3C4A35B2BC65F9600478431 /* flutter_echo_sync_appApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4A35A2BC65F9600478431 /* flutter_echo_sync_appApp.swift */; };
 		E3C4A35D2BC65F9600478431 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4A35C2BC65F9600478431 /* ContentView.swift */; };
 		E3C4A35F2BC65F9700478431 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3C4A35E2BC65F9700478431 /* Assets.xcassets */; };
 		E3C4A3622BC65F9700478431 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3C4A3612BC65F9700478431 /* Preview Assets.xcassets */; };
 		E3C4A3652BC65F9700478431 /* flutter_echo_sync_app Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E3C4A3582BC65F9600478431 /* flutter_echo_sync_app Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E3C4A36C2BC65FE600478431 /* WatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4A36B2BC65FE600478431 /* WatchViewModel.swift */; };
-		E3C4A36E2BC6600100478431 /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4A36D2BC6600100478431 /* ComplicationController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,15 +94,20 @@
 		9DD24133E1BC2365A705A42B /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		AF9AFAEA88F63CE4153FCC7C /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		B055EBC8DB35A0C0EE46A9C7 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
+		C6264F572BDA7F6C008E9199 /* CubicCurveControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CubicCurveControls.swift; sourceTree = "<group>"; };
+		C6264F582BDA7F6C008E9199 /* SiriWave2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SiriWave2.swift; sourceTree = "<group>"; };
+		C6264F592BDA7F6C008E9199 /* SiriWave2Path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SiriWave2Path.swift; sourceTree = "<group>"; };
+		C6264F5A2BDA7F6C008E9199 /* SiriWave2Shape.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SiriWave2Shape.swift; sourceTree = "<group>"; };
+		C6264F5B2BDA7F6C008E9199 /* Wave2Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wave2Data.swift; sourceTree = "<group>"; };
+		C6264F5C2BDA7F6C008E9199 /* Wave2View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wave2View.swift; sourceTree = "<group>"; };
+		C6264F642BDA800E008E9199 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CB69AD4433D779073A97D0DC /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E36F03A92BCEB1F900659AA7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E3C4A3582BC65F9600478431 /* flutter_echo_sync_app Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "flutter_echo_sync_app Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3C4A35A2BC65F9600478431 /* flutter_echo_sync_appApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = flutter_echo_sync_appApp.swift; sourceTree = "<group>"; };
 		E3C4A35C2BC65F9600478431 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E3C4A35E2BC65F9700478431 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E3C4A3612BC65F9700478431 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E3C4A36B2BC65FE600478431 /* WatchViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchViewModel.swift; sourceTree = "<group>"; };
-		E3C4A36D2BC6600100478431 /* ComplicationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComplicationController.swift; sourceTree = "<group>"; };
 		F6F2A8DB2ECF7C014E349A79 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -182,7 +192,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
-				E36F03A92BCEB1F900659AA7 /* GoogleService-Info.plist */,
+				C6264F642BDA800E008E9199 /* GoogleService-Info.plist */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -208,10 +218,23 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		C6264F5D2BDA7F6C008E9199 /* Wave2 */ = {
+			isa = PBXGroup;
+			children = (
+				C6264F572BDA7F6C008E9199 /* CubicCurveControls.swift */,
+				C6264F582BDA7F6C008E9199 /* SiriWave2.swift */,
+				C6264F592BDA7F6C008E9199 /* SiriWave2Path.swift */,
+				C6264F5A2BDA7F6C008E9199 /* SiriWave2Shape.swift */,
+				C6264F5B2BDA7F6C008E9199 /* Wave2Data.swift */,
+				C6264F5C2BDA7F6C008E9199 /* Wave2View.swift */,
+			);
+			path = Wave2;
+			sourceTree = "<group>";
+		};
 		E3C4A3592BC65F9600478431 /* flutter_echo_sync_app Watch App */ = {
 			isa = PBXGroup;
 			children = (
-				E3C4A36D2BC6600100478431 /* ComplicationController.swift */,
+				C6264F5D2BDA7F6C008E9199 /* Wave2 */,
 				E3C4A36B2BC65FE600478431 /* WatchViewModel.swift */,
 				E3C4A35A2BC65F9600478431 /* flutter_echo_sync_appApp.swift */,
 				E3C4A35C2BC65F9600478431 /* ContentView.swift */,
@@ -350,9 +373,9 @@
 			files = (
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
-				E36F03AA2BCEB1F900659AA7 /* GoogleService-Info.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				C6264F652BDA800E008E9199 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -485,9 +508,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				E3C4A35D2BC65F9600478431 /* ContentView.swift in Sources */,
-				E3C4A36E2BC6600100478431 /* ComplicationController.swift in Sources */,
+				C6264F622BDA7F6C008E9199 /* Wave2Data.swift in Sources */,
+				C6264F632BDA7F6C008E9199 /* Wave2View.swift in Sources */,
 				E3C4A35B2BC65F9600478431 /* flutter_echo_sync_appApp.swift in Sources */,
+				C6264F5E2BDA7F6C008E9199 /* CubicCurveControls.swift in Sources */,
+				C6264F602BDA7F6C008E9199 /* SiriWave2Path.swift in Sources */,
+				C6264F612BDA7F6C008E9199 /* SiriWave2Shape.swift in Sources */,
 				E3C4A36C2BC65FE600478431 /* WatchViewModel.swift in Sources */,
+				C6264F5F2BDA7F6C008E9199 /* SiriWave2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

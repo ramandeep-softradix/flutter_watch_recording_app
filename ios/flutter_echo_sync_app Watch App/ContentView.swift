@@ -29,26 +29,37 @@ struct ContentView: View {
     @State private var isRecordingPermissionGranted = false
     @ObservedObject var viewModel: WatchViewModel = WatchViewModel()
     @State var temporaryAudioFileURL: URL!
+    @State private var selectedIndex = 0
+    @State private var selectedTitle: String?
+    @State private var isAudioListEmpty = false
 
-
+    
     var body: some View {
         VStack {
             if !viewModel.isUserLoggedIn {
-
+                
                 Text("To start the recording you have to login through mobile app").bold()
                     .frame(maxWidth: .infinity)
             } else {
                 if recordingState == .idle {
-                    Text("Record Audio")
+                    Text("Record Audio").bold().padding(.bottom,5)
                     Button(action: {
-                        self.isLoading = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            self.isLoading = false
-                            requestRecordingPermission()
+                        if !viewModel.audioNameList.isEmpty {
+                            selectedTitle = viewModel.audioNameList[selectedIndex]
+                            isAudioListEmpty = false
+                            self.isLoading = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                self.isLoading = false
+                                requestRecordingPermission()
+                            }
+                        }else{
+                            isAudioListEmpty = true
+                            
                         }
+                       
                     }) {
                         Text("Start")
-                    }
+                    }.frame(height: 30)
                     .padding()
                     .opacity(isLoading ? 0 : 1)
                     .disabled(isLoading)
@@ -60,20 +71,49 @@ struct ContentView: View {
                             }
                         }
                     )
+                
+                    VStack {
+                        if !viewModel.audioNameList.isEmpty {
+                            List {
+                            let items =  viewModel.audioNameList
+                                ForEach(items.indices, id: \.self) { index in
+                                    HStack(spacing:0) {
+                                        Text(items[index]).frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.leading,10)
+                                        Button(action: {
+                                            self.selectedIndex = index
+                                        }) {
+                                            Image(systemName: selectedIndex == index ? "checkmark.circle.fill" :"plus.circle")
+                                                .foregroundColor(.white)
+                                                .frame(maxWidth: 20, alignment: .leading)
+                                        }
+                                    }
+
+                                }
+                                
+                        }.environment(\.defaultMinListRowHeight, 10)
+
+                        .listStyle(PlainListStyle())
+                    .padding(.top)
+                        } else {
+                            EmptyView()
+                        }
+                    }
+                    
                 } else if recordingState == .recording {
+                    Text(selectedTitle ?? "").bold().frame(maxWidth: .infinity)
                     if showWaveform {
-                        WaveformView()
-                            .frame(height: 80)
+                        Wave2View()
+                            .frame(height: 70)
                             .padding()
                     }
 
                     Text(String(format: "%.1f", recordingDuration))
-                        .font(.title)
 
                     Button(action: {
                         self.stopRecording()
                     }) {
-                        Text("Stop")
+                        Text("Stop").bold()
                     }
                     .buttonStyle(BorderlessButtonStyle())
                 } else if recordingState == .stopped {
@@ -86,7 +126,6 @@ struct ContentView: View {
                                     print("No recorded audio found.")
                                     return
                                 }
-
                                 playerManager.playAudio(from: recordedAudioURL)
                             }
                         }) {
@@ -107,7 +146,8 @@ struct ContentView: View {
                     }
                 }
             }
-        }
+        } 
+      
         .alert(isPresented: $isRecordingPermissionGranted) {
             Alert(
                 title: Text("Permission denied"),
@@ -119,6 +159,13 @@ struct ContentView: View {
             if !isLogged {
                 resetRecording()
             }
+        }
+        .alert(isPresented: $isAudioListEmpty) {
+            Alert(
+                title: Text("Alert!"),
+                message: Text("Please first add your recording name in ios App."),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 
@@ -176,7 +223,9 @@ struct ContentView: View {
             self.recordedAudioURL = audioRecorder.url
             print(recordedAudioURL)
 
+            viewModel.sendDataMessage(for: .sendAudioNameToFlutter, data: ["data": self.selectedTitle ?? "abccc"])
             let metadata = ["contentType": "public.aac"] //
+            
             viewModel.session.transferFile(recordedAudioURL!, metadata: metadata)
 
             audioRecorder = nil
@@ -214,6 +263,25 @@ struct ContentView: View {
         timer?.invalidate()
         recordingDuration = 0
     }
+    
+    func AudioWaveView(audioSamples: [CGFloat], offsetY: CGFloat) -> some View {
+        return GeometryReader { geometry in
+            Path { path in
+                let width = geometry.size.width
+                let height = geometry.size.height
+                
+                path.move(to: CGPoint(x: 0, y: height / 2))
+                for (index, sample) in audioSamples.enumerated() {
+                    let x = CGFloat(index) * (width / CGFloat(audioSamples.count))
+                    let y = height / 2 + sample * height / 2 * offsetY
+                    path.addLine(to: CGPoint(x: x, y: y))
+                }
+                path.addLine(to: CGPoint(x: width, y: height / 2))
+            }
+            .stroke(Color.blue, lineWidth: 2)
+            .animation(Animation.easeInOut(duration: 0.1).repeatForever())
+        }
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -222,37 +290,6 @@ struct ContentView_Previews: PreviewProvider {
             ContentView()
         } else {
             // Fallback on earlier versions
-        }
-    }
-}
-
-struct WaveformView: View {
-    let numberOfPoints = 50
-    let amplitude: CGFloat = 25
-
-    @State private var animatableData: CGFloat = 0
-
-    var body: some View {
-        GeometryReader { geometry in
-            Path { path in
-                path.move(to: CGPoint(x: 0, y: geometry.size.height / 2))
-                for i in 0..<numberOfPoints {
-                    let x = CGFloat(i) / CGFloat(numberOfPoints) * geometry.size.width
-                    let y = CGFloat(sin(Double(i) / 10 + Double(animatableData)) * Double(amplitude)) + geometry.size.height / 2
-                    path.addLine(to: CGPoint(x: x, y: y))
-                }
-            }
-            .stroke(Color.blue, lineWidth: 2)
-        }
-        .drawingGroup()
-        .onAppear {
-            startAnimation()
-        }
-    }
-
-    func startAnimation() {
-        withAnimation(Animation.linear(duration: 2).repeatForever(autoreverses: false)) {
-            animatableData = CGFloat.pi * 2
         }
     }
 }
