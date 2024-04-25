@@ -19,7 +19,6 @@ class AudioRecorderController extends GetxController {
   @override
   onInit() {
     sendAudioListToWatch();
-    getUserLogged();
     getLocalList();
     _initFlutterChannel();
   }
@@ -61,6 +60,7 @@ class AudioRecorderController extends GetxController {
     bool deleted = deleteFile(file);
     if (deleted) {
       log('File deleted successfully.');
+      recordAudio.value = "";
     } else {
       log('Failed to delete the file.');
     }
@@ -88,7 +88,6 @@ class AudioRecorderController extends GetxController {
       await channel.invokeMethod("flutterToWatch",
           {"method": "sendAudioListToWatch", "data": audioNameList.value.reversed.toList()});
       getUserLogged();
-
       log("send list To Watch Successfully!");
     } on PlatformException catch (e) {
       log("Failed to send data to watch: '${e.message}'.");
@@ -103,13 +102,15 @@ class AudioRecorderController extends GetxController {
           case "sendLoggedToWatch":
           await sendDataToWatch(isLoggedIn.value);
           sendAudioListToWatch();
-          getUserLogged();
         case "sendAudioNameToFlutter":
           recordAudioName.value  = call.arguments["data"]["audioName"];
           print("Here is name ${recordAudioName.value}");
+          sendAudioListToWatch();
+
         case "sendCounterToFlutter":
           recordAudio.value = call.arguments["recordAudio"];
           getRecordAudio();
+          sendAudioListToWatch();
           print("Here is recordAudio ${recordAudio.value}");
 
           break;

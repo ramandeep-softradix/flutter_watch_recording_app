@@ -223,7 +223,7 @@ struct ContentView: View {
             self.recordedAudioURL = audioRecorder.url
             print(recordedAudioURL)
 
-            viewModel.sendDataMessage(for: .sendAudioNameToFlutter, data: ["data": self.selectedTitle ?? "abccc"])
+            viewModel.sendDataMessage(for: .sendAudioNameToFlutter, data: ["audioName": self.selectedTitle ?? ""])
             let metadata = ["contentType": "public.aac"] //
             
             viewModel.session.transferFile(recordedAudioURL!, metadata: metadata)

@@ -21,7 +21,7 @@ class AudioRecorderScreen extends GetView<AudioRecorderController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                        Text(
-                        'Here is the recorded audio ${controller.recordAudioName}',
+                        'Here is the recorded audio ${controller.recordAudioName.value}',
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
