@@ -101,6 +101,7 @@
 		C6264F5B2BDA7F6C008E9199 /* Wave2Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wave2Data.swift; sourceTree = "<group>"; };
 		C6264F5C2BDA7F6C008E9199 /* Wave2View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wave2View.swift; sourceTree = "<group>"; };
 		C6264F642BDA800E008E9199 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C6D148C62BDF74F200690F09 /* flutter-echo-sync-app-Watch-App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "flutter-echo-sync-app-Watch-App-Info.plist"; sourceTree = SOURCE_ROOT; };
 		CB69AD4433D779073A97D0DC /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3C4A3582BC65F9600478431 /* flutter_echo_sync_app Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "flutter_echo_sync_app Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3C4A35A2BC65F9600478431 /* flutter_echo_sync_appApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = flutter_echo_sync_appApp.swift; sourceTree = "<group>"; };
@@ -234,6 +235,7 @@
 		E3C4A3592BC65F9600478431 /* flutter_echo_sync_app Watch App */ = {
 			isa = PBXGroup;
 			children = (
+				C6D148C62BDF74F200690F09 /* flutter-echo-sync-app-Watch-App-Info.plist */,
 				C6264F5D2BDA7F6C008E9199 /* Wave2 */,
 				E3C4A36B2BC65FE600478431 /* WatchViewModel.swift */,
 				E3C4A35A2BC65F9600478431 /* flutter_echo_sync_appApp.swift */,
@@ -603,6 +605,7 @@
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
 			};
 			name = Profile;
 		};
@@ -749,6 +752,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
 			};
 			name = Debug;
 		};
@@ -803,6 +807,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
 			};
 			name = Release;
 		};
@@ -898,6 +903,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "flutter-echo-sync-app-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = flutter_echo_sync_app;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Echo Sync App Watch App needs access to your microphone to capture voice notes. You can quickly record your thoughts, ideas, or reminders using your voice, making it convenient to organize and recall important information.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -943,6 +949,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "flutter-echo-sync-app-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = flutter_echo_sync_app;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Echo Sync App Watch App needs access to your microphone to capture voice notes. You can quickly record your thoughts, ideas, or reminders using your voice, making it convenient to organize and recall important information.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -987,6 +994,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "flutter-echo-sync-app-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = flutter_echo_sync_app;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Echo Sync App Watch App needs access to your microphone to capture voice notes. You can quickly record your thoughts, ideas, or reminders using your voice, making it convenient to organize and recall important information.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";

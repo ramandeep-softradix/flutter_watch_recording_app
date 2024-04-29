@@ -1,4 +1,5 @@
 import WatchConnectivity
+import WatchKit
 
 class WatchViewModel: NSObject, ObservableObject {
     var session: WCSession
@@ -11,7 +12,6 @@ class WatchViewModel: NSObject, ObservableObject {
         case sendCounterToNative
         case sendLoggedToWatch
         case sendAudioListToWatch
-
     }
 
     enum WatchSendMethod: String {
@@ -35,6 +35,7 @@ class WatchViewModel: NSObject, ObservableObject {
 }
 
 extension WatchViewModel: WCSessionDelegate {
+  
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         switch activationState {
         case .activated:
@@ -44,8 +45,6 @@ extension WatchViewModel: WCSessionDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 self.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": self.isUserLoggedIn])
             }
-            
-
         case .inactive:
             print("Unable to activate the WCSession. Error: \(error?.localizedDescription ?? "--")")
    
@@ -75,7 +74,6 @@ extension WatchViewModel: WCSessionDelegate {
             case .sendCounterToNative:
                 self.recordAudio = message["data"] as? String ?? ""
             case .sendLoggedToWatch:
-    
                  saveBoolToUserDefaults(value: message["data"] as? Bool ?? false, forKey: "isUserLoggedIn")
                 let isUserLogged = getBoolFromUserDefaults(forKey: "isUserLoggedIn")
                 isUserLoggedIn = isUserLogged

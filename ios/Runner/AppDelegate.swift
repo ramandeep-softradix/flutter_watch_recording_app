@@ -55,9 +55,12 @@ import WatchConnectivity
 extension AppDelegate: WCSessionDelegate {
 
         func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+           
             if let error {
                 print("session activation failed with error: \(error.localizedDescription)")
+                
             }
+            
         }
 
         func sessionDidBecomeInactive(_ session: WCSession) {

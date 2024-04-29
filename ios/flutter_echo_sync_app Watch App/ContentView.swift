@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import WatchConnectivity
 
 enum RecordingState {
     case idle
@@ -32,143 +33,187 @@ struct ContentView: View {
     @State private var selectedIndex = 0
     @State private var selectedTitle: String?
     @State private var isAudioListEmpty = false
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isConnected = false
 
-    
     var body: some View {
-        VStack {
-            if !viewModel.isUserLoggedIn {
-                
-                Text("To start the recording you have to login through mobile app").bold()
-                    .frame(maxWidth: .infinity)
-            } else {
-                if recordingState == .idle {
-                    Text("Record Audio").bold().padding(.bottom,5)
-                    Button(action: {
-                        if !viewModel.audioNameList.isEmpty {
-                            selectedTitle = viewModel.audioNameList[selectedIndex]
-                            isAudioListEmpty = false
-                            self.isLoading = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                self.isLoading = false
-                                requestRecordingPermission()
-                            }
-                        }else{
-                            isAudioListEmpty = true
-                            
-                        }
-                       
-                    }) {
-                        Text("Start")
-                    }.frame(height: 30)
-                    .padding()
-                    .opacity(isLoading ? 0 : 1)
-                    .disabled(isLoading)
-                    .overlay(
-                        Group {
-                            if isLoading {
-                                ProgressView()
-                                    .padding()
-                            }
-                        }
-                    )
-                
-                    VStack {
-                        if !viewModel.audioNameList.isEmpty {
-                            List {
-                            let items =  viewModel.audioNameList
-                                ForEach(items.indices, id: \.self) { index in
-                                    HStack(spacing:0) {
-                                        Text(items[index]).frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.leading,10)
-                                        Button(action: {
-                                            self.selectedIndex = index
-                                        }) {
-                                            Image(systemName: selectedIndex == index ? "checkmark.circle.fill" :"plus.circle")
-                                                .foregroundColor(.white)
-                                                .frame(maxWidth: 20, alignment: .leading)
-                                        }
-                                    }
-
+            VStack {
+                if !viewModel.isUserLoggedIn {
+                    Text("To start the recording you have to login through mobile app").bold()
+                        .frame(maxWidth: .infinity)
+                } else {
+                    if recordingState == .idle {
+                        Text("Record Audio").bold().padding(.bottom,5)
+                        Button(action: {
+                            if !viewModel.audioNameList.isEmpty {
+                                selectedTitle = viewModel.audioNameList[selectedIndex]
+                                isAudioListEmpty = false
+                                self.isLoading = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    self.isLoading = false
+                                    requestRecordingPermission()
                                 }
+                            }else{
+                                isAudioListEmpty = true
                                 
-                        }.environment(\.defaultMinListRowHeight, 10)
-
-                        .listStyle(PlainListStyle())
-                    .padding(.top)
-                        } else {
-                            EmptyView()
-                        }
-                    }
-                    
-                } else if recordingState == .recording {
-                    Text(selectedTitle ?? "").bold().frame(maxWidth: .infinity)
-                    if showWaveform {
-                        Wave2View()
-                            .frame(height: 70)
+                            }
+                            
+                        }) {
+                            Text("Start")
+                        }.frame(height: 30)
                             .padding()
-                    }
-
-                    Text(String(format: "%.1f", recordingDuration))
-
-                    Button(action: {
-                        self.stopRecording()
-                    }) {
-                        Text("Stop").bold()
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                } else if recordingState == .stopped {
-                    HStack {
-                        Button(action: {
-                            if playerManager.isPlaying {
-                                playerManager.stopAudio()
-                            } else {
-                                guard let recordedAudioURL = self.recordedAudioURL else {
-                                    print("No recorded audio found.")
-                                    return
+                            .opacity(isLoading ? 0 : 1)
+                            .disabled(isLoading)
+                            .overlay(
+                                Group {
+                                    if isLoading {
+                                        ProgressView()
+                                            .padding()
+                                    }
                                 }
-                                playerManager.playAudio(from: recordedAudioURL)
-                            }
-                        }) {
-                            if playerManager.isPlaying {
-                                Image(systemName: "pause")
+                            )
+                        
+                        VStack {
+                            if !viewModel.audioNameList.isEmpty {
+                                List {
+                                    let items =  viewModel.audioNameList
+                                    ForEach(items.indices, id: \.self) { index in
+                                        HStack(spacing:0) {
+                                            Text(items[index]).frame(maxWidth: .infinity, alignment: .leading)
+                                                .padding(.leading,10)
+                                            Button(action: {
+                                                self.selectedIndex = index
+                                            }) {
+                                                Image(systemName: selectedIndex == index ? "checkmark.circle.fill" :"plus.circle")
+                                                    .foregroundColor(.white)
+                                                    .frame(maxWidth: 20, alignment: .leading)
+                                            }
+                                        }
+                                        
+                                    }
+                                    
+                                }.environment(\.defaultMinListRowHeight, 10)
+                                
+                                    .listStyle(PlainListStyle())
+                                    .padding(.top)
                             } else {
-                                Image(systemName: "play")
+                                EmptyView()
                             }
                         }
-                        .disabled(isLoading)
-
-                        Button(action: {
-                            self.resetRecording()
-                        }) {
-                            Text("Reset")
+                        
+                    } else if recordingState == .recording {
+                        Text(selectedTitle ?? "").bold().frame(maxWidth: .infinity)
+                        if showWaveform {
+                            Wave2View()
+                                .frame(height: 70)
+                                .padding()
                         }
-                        .disabled(isLoading)
+                        
+                        Text(String(format: "%.1f", recordingDuration))
+                        
+                        Button(action: {
+                            self.stopRecording()
+                        }) {
+                            Text("Stop").bold()
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                    } else if recordingState == .stopped {
+                        HStack {
+                            Button(action: {
+                                if playerManager.isPlaying {
+                                    playerManager.stopAudio()
+                                } else {
+                                    guard let recordedAudioURL = self.recordedAudioURL else {
+                                        print("No recorded audio found.")
+                                        return
+                                    }
+                                    playerManager.playAudio(from: recordedAudioURL)
+                                }
+                            }) {
+                                if playerManager.isPlaying {
+                                    Image(systemName: "pause")
+                                } else {
+                                    Image(systemName: "play")
+                                }
+                            }
+                            .disabled(isLoading)
+                            
+                            Button(action: {
+                                self.resetRecording()
+                            }) {
+                                Text("Reset")
+                            }
+                            .disabled(isLoading)
+                        }
                     }
                 }
             }
-        } 
-      
-        .alert(isPresented: $isRecordingPermissionGranted) {
-            Alert(
-                title: Text("Permission denied"),
-                message: Text("Permission to record audio was denied. Please open the Settings app to enable audio recording permissions. Some privacy settings are shared between Apple Watch and iPhone. You can manage these settings in the Privacy section of iPhone settings."),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-        .onChange(of: viewModel.isUserLoggedIn) { isLogged in
-            if !isLogged {
-                resetRecording()
+            .onChange(of: scenePhase) { newPhase in
+                handleScenePhaseChange(newPhase)
             }
-        }
-        .alert(isPresented: $isAudioListEmpty) {
-            Alert(
-                title: Text("Alert!"),
-                message: Text("Please first add your recording name in ios App."),
-                dismissButton: .default(Text("OK"))
-            )
+            .onAppear {
+                print(" >>>>>>>>>>>>>>>>>>>>>>")
+              //  checkConnection()
+                getLoggedDetail()
+                print(">>>>>>>>>>>>>>>>>>>>>>")
+            }
+            .alert(isPresented: $isRecordingPermissionGranted) {
+                Alert(
+                    title: Text("Permission denied"),
+                    message: Text("Permission to record audio was denied. Please open the Settings app to enable audio recording permissions. Some privacy settings are shared between Apple Watch and iPhone. You can manage these settings in the Privacy section of iPhone settings."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .onChange(of: viewModel.isUserLoggedIn) { isLogged in
+                if !isLogged {
+                    resetRecording()
+                }
+            }
+            .alert(isPresented: $isAudioListEmpty) {
+                Alert(
+                    title: Text("Alert!"),
+                    message: Text("Please first add your recording name in ios App."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+       
+    }
+    func checkConnection() {
+          if WCSession.default.isReachable {
+              print("The watch is connected to the iPhone")
+
+              isConnected = true
+          } else {
+              print("The watch is not connected to the iPhone")
+
+              isConnected = false
+          }
+      }
+    func handleScenePhaseChange(_ newPhase: ScenePhase) {
+        switch newPhase {
+        case .active:
+            print("Active")
+            getLoggedDetail()
+        case .inactive:
+            getLoggedDetail()
+
+            print("Inactive")
+        case .background:
+            print("Background")
+            getLoggedDetail()
+        @unknown default:
+            break
         }
     }
-
+    func getLoggedDetail(){
+        let isUserLogged = viewModel.getBoolFromUserDefaults(forKey: "isUserLoggedIn")
+        viewModel.isUserLoggedIn = isUserLogged
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3
+        ) {
+            viewModel.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": viewModel.isUserLoggedIn])
+        }
+        viewModel.saveAudioNameList(value: viewModel.audioNameList, forKey: "audioNameList")
+    }
     func requestRecordingPermission() {
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
             if granted {
