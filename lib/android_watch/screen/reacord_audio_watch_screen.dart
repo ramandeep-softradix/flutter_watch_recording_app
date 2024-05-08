@@ -32,21 +32,30 @@ class RecordAudioWatchScreen extends StatelessWidget {
                               const SizedBox(height: 5),
                               ElevatedButton(
                                 onPressed: () {
-
                                   controller.checkAndStartRecording();
                                 },
                                 child: const Text('Start Recording'),
                               ),
+                              SizedBox(height: 4,),
                               audioTitleListView(),
                             ],
                           ),
                         if (controller.isRecording.value)
                           Column(
                             children: [
-                              Text(controller.recordAudioName.value,style: const TextStyle(fontWeight: FontWeight.w600),),
-                              const SizedBox(height: 10,),
                               Text(
-                                  'Record Time:- ${controller.duration.value.inSeconds}',style: const TextStyle(fontWeight: FontWeight.w700,fontSize: 15)),
+                                controller.recordAudioName.value,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                  'Record Time:- ${controller.duration.value.inSeconds}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15)),
                               const SizedBox(height: 10),
                               ElevatedButton(
                                 onPressed: () {
@@ -74,10 +83,10 @@ class RecordAudioWatchScreen extends StatelessWidget {
                                 onPressed: () {
                                   // Reset recording if needed
                                   controller.duration.value =
-                                      Duration(seconds: 0);
+                                      const Duration(seconds: 0);
                                   controller.stopAndClearPlayback();
                                 },
-                                child: Text('Reset'),
+                                child: const Text('Reset'),
                               ),
                             ],
                           ),
@@ -99,36 +108,56 @@ class RecordAudioWatchScreen extends StatelessWidget {
     return controller.audioNameList.isNotEmpty
         ? SizedBox(
             height: 100,
-            child:ListView.builder(
+            child: ListView.builder(
                 padding: EdgeInsets.symmetric(horizontal: 15),
                 shrinkWrap: true,
                 itemCount: controller.audioNameList.length,
                 physics: const RangeMaintainingScrollPhysics(),
                 itemBuilder: (context, index) {
                   var item = controller.audioNameList.reversed.toList();
-                  return  Obx(() => InkWell(
-                    onTap: () {
-                      controller.selectedIndex.value = index;
-                      controller.recordAudioName.value = item[index];
+                  return Obx(() => InkWell(
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                        onTap: () {
+                          controller.selectedIndex.value = index;
+                          controller.recordAudioName.value = item[index];
 
-                      print(controller.recordAudioName.value);
-                    },
-                    child: Card(
-                      color: Colors.white,
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Text(item[index]),
-                          ),
-                          const Spacer(),
-                           controller.selectedIndex.value != index ? SizedBox():Icon(Icons.check_circle_outline).paddingOnly(right: 10)
-                        ],
-                      ),
-                    ),
-                  ));
+                          print(controller.recordAudioName.value);
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey.shade200,
+                                  shape: BoxShape.rectangle,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(25))),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: Text(item[index]),
+                                  ),
+                                  const Spacer(),
+                                  controller.selectedIndex.value != index
+                                      ? SizedBox()
+                                      : Icon(Icons.check_circle_outline)
+                                          .paddingOnly(right: 10)
+                                ],
+                              ),
+                            ).paddingOnly(bottom: 2),
+                            SizedBox(height: index == -1?20:0,)
+
+                          ],
+                        ).paddingSymmetric(horizontal: 10),
+
+                      )
+                  )
+                  ;
                 }),
-             )
+          )
         : Container(
             alignment: Alignment.center,
             child: const Text(
