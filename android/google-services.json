@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "141581174318",
+    "project_id": "audio-watch",
+    "storage_bucket": "audio-watch.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141581174318:android:1f53349aeee89ec1a1c1bf",
+        "android_client_info": {
+          "package_name": "com.softradix.echosyncapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADKhMidfXWkQ0Hnn7_lVW_6xuGkonzsv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

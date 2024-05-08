@@ -18,9 +18,9 @@ class AudioRecorderController extends GetxController {
 
   @override
   onInit() {
-    sendAudioListToWatch();
-    getLocalList();
-    _initFlutterChannel();
+      sendAudioListToWatch();
+      getLocalList();
+      _initFlutterChannel();
   }
 
   getLocalList() async {
@@ -73,7 +73,6 @@ class AudioRecorderController extends GetxController {
   }
 
   sendDataToWatch(bool data) async {
-
     try {
       await channel.invokeMethod(
           "flutterToWatch", {"method": "sendLoggedToWatch", "data": data});
@@ -84,6 +83,7 @@ class AudioRecorderController extends GetxController {
   }
 
   sendAudioListToWatch() async {
+
     try {
       await channel.invokeMethod("flutterToWatch",
           {"method": "sendAudioListToWatch", "data": audioNameList.value.reversed.toList()});
@@ -97,20 +97,16 @@ class AudioRecorderController extends GetxController {
   Future<void> _initFlutterChannel() async {
     channel.setMethodCallHandler((call) async {
       log("call : ${call.method}, ${call.arguments}");
-
       switch (call.method) {
-          case "sendLoggedToWatch":
+        case "sendLoggedToWatch":
           await sendDataToWatch(isLoggedIn.value);
           sendAudioListToWatch();
         case "sendAudioNameToFlutter":
           recordAudioName.value  = call.arguments["data"]["audioName"];
           print("Here is name ${recordAudioName.value}");
-          sendAudioListToWatch();
-
         case "sendCounterToFlutter":
           recordAudio.value = call.arguments["recordAudio"];
           getRecordAudio();
-          sendAudioListToWatch();
           print("Here is recordAudio ${recordAudio.value}");
 
           break;
@@ -163,4 +159,5 @@ class AudioRecorderController extends GetxController {
       return false;
     }
   }
+
 }

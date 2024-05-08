@@ -38,6 +38,7 @@ struct ContentView: View {
 
     var body: some View {
             VStack {
+//                Text("Watch Activate:- \(viewModel.isWatchActivate)")
                 if !viewModel.isUserLoggedIn {
                     Text("To start the recording you have to login through mobile app").bold()
                         .frame(maxWidth: .infinity)
@@ -149,13 +150,12 @@ struct ContentView: View {
                 }
             }
             .onChange(of: scenePhase) { newPhase in
-                handleScenePhaseChange(newPhase)
+               handleScenePhaseChange(newPhase)
             }
             .onAppear {
-                print(" >>>>>>>>>>>>>>>>>>>>>>")
-              //  checkConnection()
-                getLoggedDetail()
-                print(">>>>>>>>>>>>>>>>>>>>>>")
+                if viewModel.isWatchActivate {
+                    getLoggedDetail()
+                }
             }
             .alert(isPresented: $isRecordingPermissionGranted) {
                 Alert(
@@ -181,7 +181,6 @@ struct ContentView: View {
     func checkConnection() {
           if WCSession.default.isReachable {
               print("The watch is connected to the iPhone")
-
               isConnected = true
           } else {
               print("The watch is not connected to the iPhone")
@@ -195,25 +194,24 @@ struct ContentView: View {
             print("Active")
             getLoggedDetail()
         case .inactive:
-            getLoggedDetail()
-
             print("Inactive")
+            getLoggedDetail()
         case .background:
             print("Background")
             getLoggedDetail()
-        @unknown default:
-            break
         }
     }
-    func getLoggedDetail(){
+    
+    func getLoggedDetail() {
         let isUserLogged = viewModel.getBoolFromUserDefaults(forKey: "isUserLoggedIn")
         viewModel.isUserLoggedIn = isUserLogged
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3
-        ) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             viewModel.sendDataMessage(for: .sendLoggedToWatch, data: ["isLogout": viewModel.isUserLoggedIn])
+            viewModel.saveAudioNameList(value: viewModel.audioNameList, forKey: "audioNameList")
         }
-        viewModel.saveAudioNameList(value: viewModel.audioNameList, forKey: "audioNameList")
     }
+    
     func requestRecordingPermission() {
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
             if granted {

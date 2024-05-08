@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_echo_sync_app/audio_recorder_login/controller/audio_recorder_controller.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_echo_sync_app/ios_audio_recorder_login/controller/audio_recorder_controller.dart';
 import 'package:flutter_echo_sync_app/local_storage/local_storage.dart';
 import 'package:get/get.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -21,7 +23,7 @@ class AudioRecorderScreen extends GetView<AudioRecorderController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                        Text(
-                        'Here is the recorded audio ${controller.recordAudioName.value}',
+                        'Recorded audio by ${controller.recordAudioName.value}',
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),

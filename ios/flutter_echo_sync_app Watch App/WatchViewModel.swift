@@ -6,8 +6,10 @@ class WatchViewModel: NSObject, ObservableObject {
     
     @Published var recordAudio: String = ""
     @Published  var isUserLoggedIn = false
-    @Published var audioNameList = [String]()
+    @Published var audioNameList = [String]() 
+    @Published  var isWatchActivate = false
 
+    
     enum WatchReceiveMethod: String {
         case sendCounterToNative
         case sendLoggedToWatch
@@ -39,6 +41,7 @@ extension WatchViewModel: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         switch activationState {
         case .activated:
+            self.isWatchActivate = true
             print("WCSession activated successfully")
             let isUserLogged = getBoolFromUserDefaults(forKey: "isUserLoggedIn")
             isUserLoggedIn = isUserLogged
